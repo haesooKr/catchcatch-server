@@ -25,7 +25,8 @@ io.on('connection', socket => {
       id: `${Math.round(Math.random() * 10)}`,
       round,
       timer,
-      language
+      language,
+      turn: []
     }
 
    const { error, user } = addUser({id: socket.id, nick, color, room});
@@ -47,7 +48,11 @@ io.on('connection', socket => {
     return callback({code: `http://localhost:3000/join?code=${rot13(socket.id)}`})
   })
 
-  socket.on('join', ({ nick, color, code }) => {
+  socket.on('join', ({ nick, color, code }, callback) => {
+    if(code === "random"){
+      return callback();
+    }
+
     const room = getUser(code).room;
     const { error, user } = addUser({id: socket.id, nick, color, room});
 
@@ -61,6 +66,47 @@ io.on('connection', socket => {
     io.to(room).emit("online", getUsersInRoom(room))
   })
 
+
+  socket.on('sendMessage', (message, callback) => {
+    const user = getUser(socket.id);
+
+    io.to(user.room).emit('message', {
+      user: user.nick,
+      text: message
+    });
+
+    callback();
+  })
+
+  socket.on('start', () => {
+    const user = getUser(socket.id);
+    io.to(user.room).emit('message', {
+      user: "admin",
+      text: "Game Starts!"
+    });
+
+    user.room.turn = getUsersInRoom(user.room).map(user => user.id) 
+
+    io.to(user.room).emit('start', {
+      round: user.room.round,
+      timer: user.room.timer,
+      turn: user.room.turn[0],
+      words: ["ex1", "ex2", "ex3"]
+    })
+  })
+
+  socket.on('drawing', ( word ) => {
+    const user = getUser(socket.id);
+    
+    io.to(user.room).emit('drawing2', {
+      time: Date.now(),
+      word
+    });
+  })
+
+  socket.on('next', () => {
+    // next turn
+  })
 
   socket.on('disconnect', () => {
     const user = removeUser(socket.id);
