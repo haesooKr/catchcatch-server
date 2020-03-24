@@ -78,6 +78,18 @@ io.on('connection', socket => {
     callback();
   })
 
+  socket.on('privateMessage', (message, callback) => {
+    const user = getUser(socket.id);
+
+    io.to(user.room).emit('message', {
+      user: user.nick,
+      text: message,
+      private: true
+    });
+
+    callback();
+  })
+
   socket.on('start', () => {
     const user = getUser(socket.id);
     io.to(user.room).emit('message', {
@@ -102,6 +114,17 @@ io.on('connection', socket => {
       time: Date.now(),
       word
     });
+  })
+
+  socket.on('correct', ( callback ) => {
+    const user = getUser(socket.id);
+    
+    io.to(user.room).emit('message', {
+      user: "admin",
+      text: `${user.nick} guessed the word!`
+    });
+
+    callback();
   })
 
   socket.on('next', () => {
