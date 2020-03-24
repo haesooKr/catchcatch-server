@@ -11,7 +11,7 @@ const addUser = ({ id, nick, color, room }) => {
     return { error: "Username is taken" };
   }
 
-  const user = { id, nick, color, room };
+  const user = { id, nick, color, room, point: 0 };
   users.push(user);
 
   return { user };
