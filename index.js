@@ -3,7 +3,7 @@ const http = require('http');
 const socket = require('socket.io');
 const cors = require('cors');
 
-const { addUser, removeUser, getUser, getUsersInRoom, showUsers } = require("./users");
+const { addUser, removeUser, getUser, getUsersInRoom, showUsers, nextTurn } = require("./users");
 const rot13 = require('./rot13');
 
 const app = express();
@@ -25,14 +25,16 @@ io.on('connection', socket => {
       id: `${Math.round(Math.random() * 10)}`,
       round,
       timer,
-      language,
-      turn: []
+      language
     }
 
    const { error, user } = addUser({id: socket.id, nick, color, room});
 
    if(error) return callback({error});
 
+   user.room.turn = user.id;
+
+   showUsers();
    
    socket.emit("message", {
       user: "admin",
@@ -97,12 +99,10 @@ io.on('connection', socket => {
       text: "Game Starts!"
     });
 
-    user.room.turn = getUsersInRoom(user.room).map(user => user.id) 
-
     io.to(user.room).emit('start', {
       round: user.room.round,
       timer: user.room.timer,
-      turn: user.room.turn[0],
+      turn: user.room.turn,
       words: ["ex1", "ex2", "ex3"]
     })
   })
@@ -119,10 +119,28 @@ io.on('connection', socket => {
   socket.on('correct', ( callback ) => {
     const user = getUser(socket.id);
     
+    user.point[0] = true;
+    user.point[1] += 1;
+
     io.to(user.room).emit('message', {
       user: "admin",
       text: `${user.nick} guessed the word!`
     });
+
+    if( (getUsersInRoom(user.room).filter(user => user.point[0] === false)).length < 1 ){
+      user.room.turn = nextTurn(user.room);
+
+      io.to(user.room).emit('message', {
+        user: "admin",
+        text: `${getUser(user.room.turn).nick}'s turn!`
+      })
+
+      io.to(user.room).emit('next', {
+        timer: user.room.timer,
+        turn: user.room.turn,
+        points: getUsersInRoom(user.room).map(user => [user.id, user.point])
+      })
+    }
 
     callback();
   })
