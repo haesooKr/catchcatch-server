@@ -33,11 +33,14 @@ const showUsers = () => console.log(users);
 
 const nextTurn = room => {
   const users = getUsersInRoom(room);
+  let id = ""
   for(let i=0; i<users.length; i++){
+    users[i].point[0] = false;
     if(room.turn === users[i].id){
-      return users[i+1] ? users[i+1].id : users[0].id;
+      users[i+1] ? id = users[i+1].id : id = users[0].id;
     }
   }
+  return id;
 }
 
 module.exports = { addUser, removeUser, getUser, getUsersInRoom, showUsers, nextTurn };
