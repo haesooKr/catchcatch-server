@@ -11,7 +11,7 @@ const addUser = ({ id, nick, color, room }) => {
     return { error: "Username is taken" };
   }
 
-  const user = { id, nick, color, room, point: 0 };
+  const user = { id, nick, color, room, point: [false, 0] };
   users.push(user);
 
   return { user };
@@ -31,4 +31,13 @@ const getUsersInRoom = room => users.filter(user => user.room === room);
 
 const showUsers = () => console.log(users);
 
-module.exports = { addUser, removeUser, getUser, getUsersInRoom, showUsers };
+const nextTurn = room => {
+  const users = getUsersInRoom(room);
+  for(let i=0; i<users.length; i++){
+    if(room.turn === users[i].id){
+      return users[i+1] ? users[i+1].id : users[0].id;
+    }
+  }
+}
+
+module.exports = { addUser, removeUser, getUser, getUsersInRoom, showUsers, nextTurn };
