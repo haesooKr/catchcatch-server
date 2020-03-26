@@ -110,6 +110,8 @@ io.on('connection', socket => {
   socket.on('drawing', ( word ) => {
     const user = getUser(socket.id);
     
+    user.point[0] = true;
+
     io.to(user.room).emit('drawing2', {
       time: Date.now(),
       word
@@ -128,6 +130,8 @@ io.on('connection', socket => {
     });
 
     if( (getUsersInRoom(user.room).filter(user => user.point[0] === false)).length < 1 ){
+      callback(); // bug fixed #2020032606
+
       user.room.turn = nextTurn(user.room);
 
       io.to(user.room).emit('message', {
@@ -135,15 +139,23 @@ io.on('connection', socket => {
         text: `${getUser(user.room.turn).nick}'s turn!`
       })
 
-      io.to(user.room).emit('next', {
+      io.to(user.room).emit('next', { // ***
         timer: user.room.timer,
         turn: user.room.turn,
         points: getUsersInRoom(user.room).map(user => [user.id, user.point[1]]),
         words: ['haesoo', 'dayhong', 'no']
       })
+    } else {
+      callback();
     }
+  })
+  
+  socket.on('sendData', ( data ) => {
+    console.log('데이터', data);
+    const user = getUser(socket.id);
 
-    callback();
+    console.log('유저', user);
+    socket.broadcast.to(user.room).emit('backData', data)
   })
 
   socket.on('next', () => {
