@@ -142,7 +142,7 @@ io.on('connection', socket => {
       io.to(user.room).emit('next', { // ***
         timer: user.room.timer,
         turn: user.room.turn,
-        points: getUsersInRoom(user.room).map(user => [user.id, user.point[1]]),
+        points: getUsersInRoom(user.room).map(user => [user.point[1]]),
         words: ['haesoo', 'dayhong', 'no']
       })
     } else {
