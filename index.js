@@ -26,7 +26,8 @@ io.on('connection', socket => {
       id: `${Math.round(Math.random() * 10)}`,
       round,
       timer,
-      language
+      language,
+      start: false
     }
 
    const { error, user } = addUser({id: socket.id, nick, color, room});
@@ -52,11 +53,22 @@ io.on('connection', socket => {
   })
 
   socket.on('join', ({ nick, color, code }, callback) => {
-    if(code === "random"){
+    const room = getUser(code).room;
+    let gameStarted = false;
+    if(room.start){
+      gameStarted = true;
+    }
+    if(gameStarted){
       return callback();
     }
+    if(code === "random"){
+      return callback(); // 랜덤입장 구현하면 삭제할것
+    }
 
-    const room = getUser(code).room;
+    
+
+
+    
     const { error, user } = addUser({id: socket.id, nick, color, room});
 
     socket.join(room);
@@ -95,6 +107,7 @@ io.on('connection', socket => {
 
   socket.on('start', () => {
     const user = getUser(socket.id);
+    user.room.start = true;
     io.to(user.room).emit('message', {
       user: "admin",
       text: "Game Starts!"
