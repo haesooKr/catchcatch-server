@@ -1,4 +1,4 @@
-words = [
+const words = [
   "개구리",
   "개미",
   "공룡",
@@ -122,4 +122,12 @@ words = [
   "새우"
 ];
 
-export default words;
+const randomWords = (num) => {
+  let arr = [];
+  while(arr.length !== 3){
+    arr.push(words[Math.floor(Math.random() * words.length)]);
+  }
+  return arr;
+}
+
+module.exports = randomWords;
