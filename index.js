@@ -176,7 +176,7 @@ io.on('connection', socket => {
       turn: user.room.turn,
       points: getUsersInRoom(user.room).map(user => [user.point[1]]),
       words: ['안녕', '나는', '해수'],
-      roundTurn: (user.room.turn === getUsersInRoom(user.room)[getUsersInRoom(user.room).length - 1].id) // check last player's turn
+      roundTurn: (user.room.turn === getUsersInRoom(user.room)[0].id) // check last player's turn
     })
   })
 
