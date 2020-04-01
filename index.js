@@ -4,6 +4,7 @@ const socket = require('socket.io');
 const cors = require('cors');
 
 const { addUser, removeUser, getUser, getUsersInRoom, showUsers, nextTurn } = require("./users");
+const randomWords = require('./words');
 const rot13 = require('./rot13');
 
 const app = express();
@@ -103,7 +104,7 @@ io.on('connection', socket => {
       round: user.room.round,
       timer: user.room.timer,
       turn: user.room.turn,
-      words: ["ex1", "ex2", "ex3"]
+      words: randomWords()
     })
   })
 
@@ -143,7 +144,7 @@ io.on('connection', socket => {
         timer: user.room.timer,
         turn: user.room.turn,
         points: getUsersInRoom(user.room).map(user => [user.point[1]]),
-        words: ['haesoo', 'dayhong', 'no'],
+        words: randomWords(),
         roundTurn: (user.room.turn === getUsersInRoom(user.room)[0].id) // check last player's turn
       })
     } else {
