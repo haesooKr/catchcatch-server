@@ -158,8 +158,24 @@ io.on('connection', socket => {
     socket.broadcast.to(user.room).emit('backData', data)
   })
 
-  socket.on('next', () => {
-    // next turn
+  socket.on('timeOver', () => {
+    const user = getUser(socket.id);
+    io.to(user.room).emit('message', {
+      user: "admin",
+      text: `Time Over!`
+    });
+    user.room.turn = nextTurn(user.room);
+    io.to(user.room).emit('message', {
+      user: "admin",
+      text: `${getUser(user.room.turn).nick}'s turn!`
+    })
+
+    io.to(user.room).emit('next', { // ***
+      timer: user.room.timer,
+      turn: user.room.turn,
+      points: getUsersInRoom(user.room).map(user => [user.point[1]]),
+      words: ['안녕', '나는', '해수']
+    })
   })
 
   socket.on('disconnect', () => {
