@@ -121,3 +121,5 @@ words = [
   "낙지",
   "새우"
 ];
+
+export default words;
