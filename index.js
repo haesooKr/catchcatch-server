@@ -143,7 +143,8 @@ io.on('connection', socket => {
         timer: user.room.timer,
         turn: user.room.turn,
         points: getUsersInRoom(user.room).map(user => [user.point[1]]),
-        words: ['haesoo', 'dayhong', 'no']
+        words: ['haesoo', 'dayhong', 'no'],
+        roundTurn: (user.room.turn === getUsersInRoom(user.room)[0].id) // check last player's turn
       })
     } else {
       callback();
@@ -174,7 +175,8 @@ io.on('connection', socket => {
       timer: user.room.timer,
       turn: user.room.turn,
       points: getUsersInRoom(user.room).map(user => [user.point[1]]),
-      words: ['안녕', '나는', '해수']
+      words: ['안녕', '나는', '해수'],
+      roundTurn: (user.room.turn === getUsersInRoom(user.room)[getUsersInRoom(user.room).length - 1].id) // check last player's turn
     })
   })
 
