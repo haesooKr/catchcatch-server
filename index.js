@@ -53,7 +53,12 @@ io.on('connection', socket => {
   })
 
   socket.on('join', ({ nick, color, code }, callback) => {
-    const room = getUser(code).room;
+    let room;
+    if(code === "random"){
+      return callback(); // 랜덤입장 구현하면 삭제할것
+    } else {
+      try {
+        room = getUser(code).room; 
     let gameStarted = false;
     if(room.start){
       gameStarted = true;
@@ -61,8 +66,9 @@ io.on('connection', socket => {
     if(gameStarted){
       return callback();
     }
-    if(code === "random"){
-      return callback(); // 랜덤입장 구현하면 삭제할것
+      } catch (error) {
+        return callback('존재하지않거나 부정확한 Code 입니다.');
+    }
     }
 
     
@@ -189,7 +195,7 @@ io.on('connection', socket => {
       timer: user.room.timer,
       turn: user.room.turn,
       points: getUsersInRoom(user.room).map(user => [user.point[1]]),
-      words: ['안녕', '나는', '해수'],
+      words: randomWords(),
       roundTurn: (user.room.turn === getUsersInRoom(user.room)[0].id) // check last player's turn
     })
   })
