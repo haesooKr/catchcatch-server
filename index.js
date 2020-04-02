@@ -201,10 +201,18 @@ io.on('connection', socket => {
   })
 
   socket.on('disconnect', () => {
-    const user = removeUser(socket.id);
+    const user = getUser(socket.id);
+    if(user.room.start === false && user.id === getUsersInRoom(user.room)[0].id){
+      socket.broadcast.to(user.room).emit('message', {
+        user: "admin",
+        text: 'Host has left before the game starts. Please leave the room, and create a new room to play.'
+      })
+    }
+
+    removeUser(socket.id);
 
     if(user){
-      io.to(user.room).emit('message', {
+      socket.broadcast.to(user.room).emit('message', {
         user: "admin",
         text: `${user.nick} has left.`
       })
@@ -213,6 +221,12 @@ io.on('connection', socket => {
     console.log('user disconnected');
     showUsers();
   })
+
+      // 게임 시작전
+    // 게임 시작후
+      // 방장일때 나갔을때
+      // 자기차례에 나갔을때 x
+      // 안맞추고 나갔을때
 })
 
 server.listen(PORT, () => {
