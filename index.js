@@ -210,7 +210,7 @@ io.on('connection', socket => {
     if(user.room.start === false && user.id === getUsersInRoom(user.room)[0].id){
       socket.broadcast.to(user.room).emit('message', {
         user: "admin",
-        text: 'Host has left before the game starts. Please leave the room, and create a new room to play.'
+        text: 'Host has left before the game starts. If you cannot see INVITE CODE in this room, please leave the room, and create a new room to play.'
       })
     }
     if(user.room.start === true && user.room.turn === user.id){
