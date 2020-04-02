@@ -200,12 +200,34 @@ io.on('connection', socket => {
     })
   })
 
+  socket.on('turnReset', () => {
+    const user = getUser(socket.id);
+    user.room.turn = user.id;
+  })
+
   socket.on('disconnect', () => {
     const user = getUser(socket.id);
     if(user.room.start === false && user.id === getUsersInRoom(user.room)[0].id){
       socket.broadcast.to(user.room).emit('message', {
         user: "admin",
         text: 'Host has left before the game starts. Please leave the room, and create a new room to play.'
+      })
+    }
+    if(user.room.start === true && user.room.turn === user.id){
+      user.room.turn = nextTurn(user.room);
+      io.to(user.room).emit('message', {
+        user: "admin",
+        text: `${getUser(user.room.turn).nick}'s turn!`
+      })
+
+      const id = user.id;
+
+      io.to(user.room).emit('next', { // ***
+        timer: user.room.timer,
+        turn: user.room.turn,
+        points: getUsersInRoom(user.room).filter(user => user.id !== id).map(user => [user.point[1]]),
+        words: randomWords(),
+        roundTurn: (user.room.turn === getUsersInRoom(user.room)[0].id) // check last player's turn
       })
     }
 
@@ -218,15 +240,13 @@ io.on('connection', socket => {
       })
     }
     
-    console.log('user disconnected');
-    showUsers();
+    if(getUsersInRoom(user.room).length > 1){
+      socket.broadcast.to(user.room).emit("online", getUsersInRoom(user.room))
+    } else {
+      socket.broadcast.to(user.room).emit("online", getUsersInRoom(user.room), true)
+    }
+    
   })
-
-      // 게임 시작전
-    // 게임 시작후
-      // 방장일때 나갔을때
-      // 자기차례에 나갔을때 x
-      // 안맞추고 나갔을때
 })
 
 server.listen(PORT, () => {
